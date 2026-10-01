@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Chess Quest: Castle Puzzles for Kids - A playful, educational chess puzzle game featuring animated mascot coaching, progressive hints, and 50 adventure levels!">
+  <meta name="theme-color" content="#8E24AA">
+  <title>Chess Quest: Castle Puzzles for Kids</title>
+
+  <!-- Google Fonts: Fredoka & Quicksand for playful kid-friendly typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/board.css">
+  <link rel="stylesheet" href="./css/mascot.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏰</text></svg>">
+</head>
+<body data-theme="candy">
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section" id="btn-brand">
+        <span class="brand-icon">🏰</span>
+        <h1 class="brand-title">Chess Quest</h1>
+      </div>
+
+      <div class="header-center">
+        <button class="world-badge-btn" id="world-badge-btn" title="Click to view Worlds">
+          🌱 Sunny Meadow
+        </button>
+        <div class="total-stars-pill" title="Total Stars Earned">
+          <span id="total-stars-count">0 ⭐</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="nav-icon-btn" id="btn-theme-selector" title="Switch Theme (Candy, Forest, Royal, Cosmic)" aria-label="Change Theme">🎨</button>
+        <button class="nav-icon-btn" id="btn-toggle-dots" title="Helper Dots: OFF (Click to toggle)" aria-label="Toggle Helper Dots">⚪</button>
+        <button class="nav-icon-btn" id="btn-how-to-play" title="How Pieces Move" aria-label="Chess Rules">📖</button>
+        <button class="nav-icon-btn" id="btn-toggle-sound" title="Mute/Unmute Sound" aria-label="Toggle Sound">🔊</button>
+        <button class="nav-icon-btn" id="btn-open-map" title="Level Map" aria-label="Select Level">🗺️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Game Layout -->
+  <main class="main-game-layout">
+    
+    <!-- Level Banner -->
+    <section class="level-banner">
+      <div class="level-meta">
+        <span class="level-number-badge" id="level-number-text">Level 1</span>
+        <h2 class="level-title-heading" id="level-title-text">The Queen's Hug</h2>
+        <div class="level-goal-instruction" id="level-goal-text">
+          <span class="turn-dot turn-w"></span> White to Play — Checkmate the King in 1 move!
+        </div>
+      </div>
+      <div class="level-stars-wrapper" id="level-stars-display">
+        <span class="star-icon star-empty">⭐</span>
+        <span class="star-icon star-empty">⭐</span>
+        <span class="star-icon star-empty">⭐</span>
+      </div>
+    </section>
+
+    <!-- Game Arena (Board + Companion Mascot) -->
+    <section class="game-arena">
+      <!-- Chessboard Container -->
+      <div class="chessboard-container" id="chessboard-mount">
+        <!-- Chessboard dynamically mounted by board.js -->
+      </div>
+
+      <!-- Mascot Companion Container -->
+      <aside class="companion-container" id="mascot-mount">
+        <!-- Sir Sparky dynamically mounted by mascot.js -->
+      </aside>
+    </section>
+
+    <!-- 3-Second Inactivity Helper Dots Offer Prompt -->
+    <div class="helper-dots-prompt" id="helper-dots-prompt" style="display: none;">
+      <div class="helper-prompt-card">
+        <div class="helper-prompt-msg">
+          <span class="helper-prompt-mascot">🐉</span>
+          <span class="helper-prompt-text">Need a little help? Want to see the green helper dots?</span>
+        </div>
+        <div class="helper-prompt-actions">
+          <button class="helper-prompt-btn btn-yes" id="btn-helper-dots-yes">🟢 Yes, show dots!</button>
+          <button class="helper-prompt-btn btn-no" id="btn-helper-dots-no">No, I got this! 💪</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <section class="controls-panel">
+      <!-- 3-Tier Progressive Hint System -->
+      <div class="hint-tier-section">
+        <button class="hint-pill-btn hint-nudge" id="btn-hint-nudge" title="Hint 1: Glows the piece to move">
+          💡 Nudge
+        </button>
+        <button class="hint-pill-btn hint-target" id="btn-hint-target" title="Hint 2: Highlights the target square">
+          🎯 Target
+        </button>
+        <button class="hint-pill-btn hint-wand" id="btn-hint-wand" title="Hint 3: Animates the magic move">
+          🪄 Magic Wand
+        </button>
+      </div>
+
+      <!-- Action Navigation Row -->
+      <div class="action-nav-row">
+        <button class="game-btn btn-secondary" id="btn-prev-level" title="Previous Puzzle">
+          ◀ Prev
+        </button>
+        <button class="game-btn btn-secondary" id="btn-restart-level" title="Reset Current Position">
+          🔄 Retry
+        </button>
+        <button class="game-btn btn-primary" id="btn-next-level-nav" title="Next Puzzle">
+          Next ▶
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- VICTORY MODAL -->
+  <div class="modal-overlay" id="victory-modal">
+    <div class="modal-box">
+      <div class="victory-modal-content">
+        <div class="victory-stars" id="victory-stars-box">
+          <span class="victory-star animate-star">⭐</span>
+          <span class="victory-star animate-star">⭐</span>
+          <span class="victory-star animate-star">⭐</span>
+        </div>
+        <h3 class="victory-title" id="victory-title">🎉 Brilliant Move!</h3>
+        <p class="victory-message" id="victory-message">You found the winning tactic!</p>
+        <div class="victory-actions">
+          <button class="game-btn btn-secondary" id="btn-replay-level">Play Again</button>
+          <button class="game-btn btn-primary btn-large" id="btn-next-level">Next Puzzle ➔</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL SELECT MODAL -->
+  <div class="modal-overlay" id="level-select-modal">
+    <div class="modal-box">
+      <button class="modal-close-btn" aria-label="Close">&times;</button>
+      <h3 style="margin-bottom: 12px; font-size: 1.4rem;">🗺️ Kingdom Adventure Map</h3>
+      
+      <!-- World Tabs -->
+      <div class="world-tabs" id="world-tabs-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Level Cards Grid -->
+      <div class="level-grid" id="level-grid-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="game-btn btn-secondary" id="btn-reset-progress" style="font-size: 0.85rem; opacity: 0.8;">
+          ⚠️ Reset Adventure Progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY / RULES MODAL -->
+  <div class="modal-overlay" id="rules-modal">
+    <div class="modal-box">
+      <button class="modal-close-btn" aria-label="Close">&times;</button>
+      <h3 style="margin-bottom: 6px; font-size: 1.4rem;">📖 How Pieces Move</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Tap any piece on your turn to see friendly green dots where it can go!</p>
+
+      <div class="rules-grid">
+        <div class="piece-rule-card">
+          <svg viewBox="0 0 50 50">
+            <ellipse cx="25" cy="14" rx="7" ry="7" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" />
+            <path d="M 20 21 Q 25 24 30 21 Q 29 32 32 37 L 18 37 Q 21 32 20 21 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" />
+            <path d="M 13 41 Q 25 39 37 41 L 37 45 Q 25 43 13 45 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2" />
+          </svg>
+          <div class="piece-rule-info">
+            <h4>Brave Pawn</h4>
+            <p>Marches forward 1 square. Captures 1 square diagonally! Reaches the end to become a Queen!</p>
+          </div>
+        </div>
+
+        <div class="piece-rule-card">
+          <svg viewBox="0 0 50 50">
+            <path d="M 13 44 L 37 44 Q 38 40 35 39 L 15 39 Q 12 40 13 44 Z" fill="#FFF9C4" stroke="#1A202C" stroke-width="2.2" stroke-linejoin="round" />
+            <path d="M 16 39 C 16 33, 17 29, 20 27 C 17 27, 12 25, 10 22 C 8 19, 13 16, 18 15 C 20 12, 21 7, 23 5 C 25 7, 25 10, 25 11 C 28 8, 30 7, 31 10 C 36 13, 37 19, 36 24 C 38 27, 37 32, 34 35 C 35 37, 34 39, 34 39 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" stroke-linejoin="round" />
+            <path d="M 23 12 L 23 5 L 26 11 Z" fill="#FFB300" stroke="#1A202C" stroke-width="1.8" />
+            <path d="M 28 12 L 31 7 L 32 12 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="1.8" />
+            <path d="M 34 16 Q 38 18 36 22" fill="none" stroke="#FFB300" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 35 23 Q 39 26 36 30" fill="none" stroke="#FFB300" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 34 31 Q 38 34 34 37" fill="none" stroke="#FFB300" stroke-width="2.5" stroke-linecap="round" />
+            <ellipse cx="20" cy="18" rx="2.8" ry="3.2" fill="#FFB300" stroke="#1A202C" stroke-width="1.2" />
+            <circle cx="21" cy="17" r="1.1" fill="#FFFFFF" />
+            <circle cx="12" cy="20.5" r="1.2" fill="#1A202C" />
+            <path d="M 11 23 Q 14 24 16 22.5" fill="none" stroke="#1A202C" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <div class="piece-rule-info">
+            <h4>Jumping Knight</h4>
+            <p>Moves in an "L" shape (2 squares then 1). The only piece that can jump over others!</p>
+          </div>
+        </div>
+
+        <div class="piece-rule-card">
+          <svg viewBox="0 0 50 50">
+            <circle cx="25" cy="11" r="2.5" fill="#FFB300" stroke="#1A202C" stroke-width="1.8" />
+            <path d="M 18 24 C 17 14 33 14 32 24 C 32 30 30 35 31 38 L 19 38 C 20 35 18 30 18 24 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" />
+            <path d="M 14 38 L 36 38 L 37 44 L 13 44 Z" fill="#FFF9C4" stroke="#1A202C" stroke-width="2.2" />
+          </svg>
+          <div class="piece-rule-info">
+            <h4>Laser Bishop</h4>
+            <p>Zooms diagonally as far as it wants, staying on its matching square color forever!</p>
+          </div>
+        </div>
+
+        <div class="piece-rule-card">
+          <svg viewBox="0 0 50 50">
+            <rect x="15" y="11" width="20" height="8" rx="2" fill="#FFFFFF" stroke="#1A202C" stroke-width="2" />
+            <path d="M 17 19 L 19 36 L 31 36 L 33 19 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" />
+            <path d="M 14 36 L 36 36 L 38 44 L 12 44 Z" fill="#FFF9C4" stroke="#1A202C" stroke-width="2.2" />
+          </svg>
+          <div class="piece-rule-info">
+            <h4>Castle Rook</h4>
+            <p>Rolls straight forward, backwards, left, or right as far as the path is open!</p>
+          </div>
+        </div>
+
+        <div class="piece-rule-card">
+          <svg viewBox="0 0 50 50">
+            <circle cx="16" cy="14" r="2.2" fill="#FFB300" />
+            <circle cx="25" cy="10" r="2.5" fill="#FFB300" />
+            <circle cx="34" cy="14" r="2.2" fill="#FFB300" />
+            <path d="M 16 16 L 19 35 L 31 35 L 34 16 L 28 24 L 25 13 L 22 24 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" />
+          </svg>
+          <div class="piece-rule-info">
+            <h4>Queen Stella</h4>
+            <p>Super powerful! Combines the moves of the Rook and Bishop in any direction!</p>
+          </div>
+        </div>
+
+        <div class="piece-rule-card">
+          <svg viewBox="0 0 50 50">
+            <line x1="25" y1="7" x2="25" y2="15" stroke="#FFB300" stroke-width="3" stroke-linecap="round" />
+            <line x1="21" y1="10" x2="29" y2="10" stroke="#FFB300" stroke-width="3" stroke-linecap="round" />
+            <path d="M 17 19 Q 25 15 33 19 Q 34 26 31 35 L 19 35 Q 16 26 17 19 Z" fill="#FFFFFF" stroke="#1A202C" stroke-width="2.2" />
+          </svg>
+          <div class="piece-rule-info">
+            <h4>King Leo</h4>
+            <p>Steps 1 square in any direction. Protect your King, and checkmate the enemy King!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Script Entry Point -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

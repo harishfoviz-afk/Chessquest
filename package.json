@@ -1,0 +1,22 @@
+{
+  "name": "chess-quest-puzzles-kids",
+  "version": "1.0.0",
+  "description": "Engaging, mobile-responsive chess puzzle educational web app for kids",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "start": "node serve.js",
+    "test": "node test_puzzles.js"
+  },
+  "keywords": [
+    "chess",
+    "puzzles",
+    "kids",
+    "education",
+    "game",
+    "chess.js",
+    "github-pages"
+  ],
+  "author": "Antigravity Team",
+  "license": "MIT"
+}

@@ -1,0 +1,169 @@
+/* =========================================================
+   MASCOT COMPANION (SIR SPARKY) STYLES
+   Animated SVG character, speech bubble, moods & micro-interactions
+   ========================================================= */
+
+.mascot-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+/* Mascot Speech Bubble */
+.mascot-bubble {
+  position: relative;
+  background: #FFFFFF;
+  border: 3px solid var(--primary);
+  border-radius: 20px;
+  padding: 12px 18px;
+  max-width: 290px;
+  width: 90%;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.35;
+  text-align: center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bubble-tail {
+  position: absolute;
+  bottom: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 11px solid var(--primary);
+}
+
+.bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 9px solid #FFFFFF;
+}
+
+.bubble-pop {
+  animation: bubblePopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Sparky Character Figure */
+.mascot-character {
+  width: 130px;
+  height: 130px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.12));
+}
+
+.mascot-character:hover {
+  transform: scale(1.08) translateY(-4px);
+}
+
+.mascot-character:active {
+  transform: scale(0.96);
+}
+
+.sparky-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Idle Breathing & Flapping */
+.mood-idle {
+  animation: dragonBreathe 3.5s ease-in-out infinite;
+}
+
+.mood-idle .dragon-tail {
+  animation: tailWag 2.5s ease-in-out infinite alternate;
+  transform-origin: 110px 120px;
+}
+
+/* Cheer / Celebration Dance */
+.mood-cheer {
+  animation: cheerJump 0.6s ease-in-out infinite alternate;
+}
+
+.mood-cheer .dragon-wings .wing-left {
+  animation: wingFlapLeft 0.3s ease-in-out infinite alternate;
+  transform-origin: 45px 75px;
+}
+
+.mood-cheer .dragon-wings .wing-right {
+  animation: wingFlapRight 0.3s ease-in-out infinite alternate;
+  transform-origin: 115px 75px;
+}
+
+/* Thinking Mood */
+.mood-thinking {
+  animation: headTilt 2s ease-in-out infinite alternate;
+}
+
+/* Oops / Curious Mood */
+.mood-oops {
+  animation: oopsNudge 1.5s ease-in-out infinite alternate;
+}
+
+/* Hint Wand Glowing */
+.mood-hint .magic-wand {
+  animation: wandTwinkle 1s ease-in-out infinite alternate;
+  transform-origin: 112px 96px;
+}
+
+/* Keyframe Animations */
+@keyframes bubblePopIn {
+  0% { transform: scale(0.6) translateY(10px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes dragonBreathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.02); }
+}
+
+@keyframes tailWag {
+  0% { transform: rotate(-4deg); }
+  100% { transform: rotate(8deg); }
+}
+
+@keyframes cheerJump {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-16px) scale(1.08); }
+}
+
+@keyframes wingFlapLeft {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-25deg); }
+}
+
+@keyframes wingFlapRight {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(25deg); }
+}
+
+@keyframes headTilt {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(6deg) translateY(-2px); }
+}
+
+@keyframes oopsNudge {
+  0% { transform: rotate(-4deg); }
+  100% { transform: rotate(4deg); }
+}
+
+@keyframes wandTwinkle {
+  0% { transform: rotate(-5deg); filter: drop-shadow(0 0 4px #FFEB3B); }
+  100% { transform: rotate(8deg); filter: drop-shadow(0 0 16px #FFF176); }
+}

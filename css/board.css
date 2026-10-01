@@ -1,0 +1,222 @@
+/* =========================================================
+   CHESSBOARD & PIECE STYLES
+   Responsive grid, touch interactions, hot & cold dots, hints
+   ========================================================= */
+
+.chessboard-wrapper {
+  position: relative;
+  display: inline-block;
+  padding: 10px;
+  background: var(--board-border);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease;
+}
+
+.chessboard-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: min(88vw, 68vh, 440px);
+  height: min(88vw, 68vh, 440px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+  touch-action: none; /* Prevents mobile scrolling while dragging */
+}
+
+/* Board Squares */
+.board-square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.square-light {
+  background-color: var(--board-light);
+}
+
+.square-dark {
+  background-color: var(--board-dark);
+}
+
+/* Edge Coordinate Labels */
+.coord-label {
+  position: absolute;
+  font-size: 0.65rem;
+  font-weight: 800;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.coord-rank {
+  top: 3px;
+  left: 4px;
+}
+
+.coord-file {
+  bottom: 2px;
+  right: 4px;
+}
+
+.square-light .coord-label {
+  color: var(--board-dark);
+}
+
+.square-dark .coord-label {
+  color: var(--board-light);
+}
+
+/* Piece Elements */
+.piece-element {
+  width: 90%;
+  height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
+}
+
+.piece-element:active {
+  cursor: grabbing;
+}
+
+.chess-piece-svg {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.18));
+}
+
+.dragging-source {
+  opacity: 0.35;
+  transform: scale(0.9);
+}
+
+/* Floating Ghost Piece (Drag & Drop) */
+.floating-ghost-piece {
+  pointer-events: none;
+  z-index: 9999;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.28));
+  cursor: grabbing;
+}
+
+/* Board Highlights */
+
+/* Selected piece square */
+.board-square.selected {
+  background-color: var(--board-selected) !important;
+  box-shadow: inset 0 0 0 3px #FFA000;
+}
+
+.board-square.drag-hover {
+  background-color: rgba(255, 235, 59, 0.55) !important;
+}
+
+/* Hot & Cold Highlights: Legal move indicator dot */
+.move-dot {
+  position: absolute;
+  width: 32%;
+  height: 32%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #4CAF50 40%, #43A047 100%);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+  pointer-events: none;
+  z-index: 3;
+  animation: dotPulse 1.8s infinite ease-in-out;
+}
+
+/* Hot & Cold Highlights: Capture indicator ring */
+.capture-ring {
+  position: absolute;
+  width: 82%;
+  height: 82%;
+  border-radius: 50%;
+  border: 4px solid #FF5722;
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.6), inset 0 0 8px rgba(255, 87, 34, 0.3);
+  pointer-events: none;
+  z-index: 3;
+  animation: ringPulse 1.6s infinite ease-in-out;
+}
+
+/* Hint 1: Nudge Aura (Glowing source piece) */
+.board-square.hint-source {
+  animation: hintAura 1.5s infinite ease-in-out;
+  z-index: 4;
+}
+
+/* Hint 2: Target Sparkle (Target square) */
+.board-square.hint-target {
+  animation: targetSparkle 1.4s infinite ease-in-out;
+  z-index: 4;
+}
+
+/* King in Check indicator */
+.board-square.in-check {
+  background: radial-gradient(circle, rgba(244, 67, 54, 0.8) 0%, rgba(244, 67, 54, 0.2) 75%) !important;
+  animation: checkPulse 1s infinite alternate;
+}
+
+/* Magic Wand Animations */
+.magic-wand-ghost {
+  filter: drop-shadow(0 0 16px #FFD54F) drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+}
+
+.magic-wand-flash {
+  background-color: #FFF176 !important;
+  box-shadow: inset 0 0 20px #FFD54F, 0 0 25px #FFEB3B !important;
+  transition: all 0.3s ease;
+}
+
+/* Non-Punitive Playful Oops Wobble */
+.board-wobble {
+  animation: gentleWobble 0.55s ease-in-out;
+}
+
+@keyframes gentleWobble {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px) rotate(-1.5deg); }
+  40% { transform: translateX(8px) rotate(1.5deg); }
+  60% { transform: translateX(-5px) rotate(-0.8deg); }
+  80% { transform: translateX(4px) rotate(0.8deg); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.85; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes hintAura {
+  0%, 100% {
+    box-shadow: inset 0 0 0 4px #FFD54F, 0 0 16px rgba(255, 213, 79, 0.7);
+  }
+  50% {
+    box-shadow: inset 0 0 0 6px #FFB300, 0 0 26px rgba(255, 179, 0, 0.9);
+  }
+}
+
+@keyframes targetSparkle {
+  0%, 100% {
+    box-shadow: inset 0 0 0 4px #4DD0E1, 0 0 14px rgba(77, 208, 225, 0.7);
+  }
+  50% {
+    box-shadow: inset 0 0 0 6px #00BCD4, 0 0 24px rgba(0, 188, 212, 0.9);
+  }
+}
+
+@keyframes checkPulse {
+  0% { box-shadow: inset 0 0 0 3px #F44336; }
+  100% { box-shadow: inset 0 0 14px #F44336; }
+}
