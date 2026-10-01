@@ -69,9 +69,41 @@
 
     <!-- Game Arena (Board + Companion Mascot) -->
     <section class="game-arena">
-      <!-- Chessboard Container -->
-      <div class="chessboard-container" id="chessboard-mount">
-        <!-- Chessboard dynamically mounted by board.js -->
+      <!-- Board Column: Chessboard + All 6 Buttons Directly Below -->
+      <div class="board-column">
+        <!-- Chessboard Container -->
+        <div class="chessboard-container" id="chessboard-mount">
+          <!-- Chessboard dynamically mounted by board.js -->
+        </div>
+
+        <!-- Controls Panel (All 6 Buttons DIRECTLY Below the Board) -->
+        <section class="controls-panel">
+          <!-- 3-Tier Progressive Hint System -->
+          <div class="hint-tier-section">
+            <button class="hint-pill-btn hint-nudge" id="btn-hint-nudge" title="Hint 1: Glows the piece to move">
+              💡 Nudge
+            </button>
+            <button class="hint-pill-btn hint-target" id="btn-hint-target" title="Hint 2: Highlights the target square">
+              🎯 Target
+            </button>
+            <button class="hint-pill-btn hint-wand" id="btn-hint-wand" title="Hint 3: Animates the magic move">
+              🪄 Magic Wand
+            </button>
+          </div>
+
+          <!-- Action Navigation Row -->
+          <div class="action-nav-row">
+            <button class="game-btn btn-secondary" id="btn-prev-level" title="Previous Puzzle">
+              ◀ Prev
+            </button>
+            <button class="game-btn btn-secondary" id="btn-restart-level" title="Reset Current Position">
+              🔄 Retry
+            </button>
+            <button class="game-btn btn-primary" id="btn-next-level-nav" title="Next Puzzle">
+              Next ▶
+            </button>
+          </div>
+        </section>
       </div>
 
       <!-- Mascot Companion Container -->
@@ -80,48 +112,20 @@
       </aside>
     </section>
 
-    <!-- 3-Second Inactivity Helper Dots Offer Prompt -->
-    <div class="helper-dots-prompt" id="helper-dots-prompt" style="display: none;">
-      <div class="helper-prompt-card">
-        <div class="helper-prompt-msg">
-          <span class="helper-prompt-mascot">🐉</span>
-          <span class="helper-prompt-text">Need a little help? Want to see the green helper dots?</span>
+    <!-- Playful Floating Pop-Up Helper Dots Offer (Pops Up & Gently Blinks) -->
+    <div class="helper-popup-toast" id="helper-dots-prompt" style="display: none;">
+      <div class="helper-toast-card">
+        <span class="toast-mascot-emoji">🐉</span>
+        <div class="toast-text-group">
+          <span class="toast-title">Need a little help?</span>
+          <span class="toast-desc">Show green helper dots? 🟢</span>
         </div>
-        <div class="helper-prompt-actions">
-          <button class="helper-prompt-btn btn-yes" id="btn-helper-dots-yes">🟢 Yes, show dots!</button>
-          <button class="helper-prompt-btn btn-no" id="btn-helper-dots-no">No, I got this! 💪</button>
+        <div class="toast-actions">
+          <button class="toast-btn btn-yes" id="btn-helper-dots-yes">🟢 Show dots!</button>
+          <button class="toast-btn btn-no" id="btn-helper-dots-no" title="Dismiss">No thanks 💪</button>
         </div>
       </div>
     </div>
-
-    <!-- Controls Panel -->
-    <section class="controls-panel">
-      <!-- 3-Tier Progressive Hint System -->
-      <div class="hint-tier-section">
-        <button class="hint-pill-btn hint-nudge" id="btn-hint-nudge" title="Hint 1: Glows the piece to move">
-          💡 Nudge
-        </button>
-        <button class="hint-pill-btn hint-target" id="btn-hint-target" title="Hint 2: Highlights the target square">
-          🎯 Target
-        </button>
-        <button class="hint-pill-btn hint-wand" id="btn-hint-wand" title="Hint 3: Animates the magic move">
-          🪄 Magic Wand
-        </button>
-      </div>
-
-      <!-- Action Navigation Row -->
-      <div class="action-nav-row">
-        <button class="game-btn btn-secondary" id="btn-prev-level" title="Previous Puzzle">
-          ◀ Prev
-        </button>
-        <button class="game-btn btn-secondary" id="btn-restart-level" title="Reset Current Position">
-          🔄 Retry
-        </button>
-        <button class="game-btn btn-primary" id="btn-next-level-nav" title="Next Puzzle">
-          Next ▶
-        </button>
-      </div>
-    </section>
 
   </main>
 

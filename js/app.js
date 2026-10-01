@@ -198,18 +198,38 @@ class ChessQuestApp {
   showHelperDotsPrompt() {
     const promptEl = document.getElementById('helper-dots-prompt');
     if (promptEl) {
-      promptEl.style.display = 'flex';
-      promptEl.classList.remove('prompt-pop-in');
-      void promptEl.offsetWidth; // Force reflow
-      promptEl.classList.add('prompt-pop-in');
+      promptEl.style.display = 'block';
+      const card = promptEl.querySelector('.helper-toast-card');
+      if (card) {
+        card.classList.remove('toast-pop-out');
+      }
     }
     this.mascot.say("Need a little help? Want me to show the green helper dots? 🟢", 'thinking', 8000);
+
+    // Auto-dismiss after 9 seconds if untouched so it never hangs around
+    if (this.toastAutoDismissTimer) clearTimeout(this.toastAutoDismissTimer);
+    this.toastAutoDismissTimer = setTimeout(() => {
+      this.hideHelperDotsPrompt();
+    }, 9000);
   }
 
   hideHelperDotsPrompt() {
+    if (this.toastAutoDismissTimer) {
+      clearTimeout(this.toastAutoDismissTimer);
+      this.toastAutoDismissTimer = null;
+    }
     const promptEl = document.getElementById('helper-dots-prompt');
-    if (promptEl) {
-      promptEl.style.display = 'none';
+    if (promptEl && promptEl.style.display !== 'none') {
+      const card = promptEl.querySelector('.helper-toast-card');
+      if (card) {
+        card.classList.add('toast-pop-out');
+        setTimeout(() => {
+          promptEl.style.display = 'none';
+          card.classList.remove('toast-pop-out');
+        }, 280);
+      } else {
+        promptEl.style.display = 'none';
+      }
     }
   }
 
