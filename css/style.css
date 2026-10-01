@@ -356,12 +356,12 @@ body {
 .controls-panel {
   background: var(--panel-bg);
   border-radius: var(--border-radius-md);
-  padding: 12px 16px;
+  padding: 8px 12px;
   box-shadow: var(--shadow-sm);
   border: 2px solid var(--panel-border);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -369,33 +369,34 @@ body {
 .hint-tier-section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .hint-pill-btn {
   border: none;
   border-radius: var(--border-radius-sm);
-  padding: 12px 10px;
+  padding: 7px 8px;
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
 }
 
 .hint-pill-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
 }
 
 .hint-pill-btn:active {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 
 .hint-nudge {
@@ -431,15 +432,17 @@ body {
   font-weight: 700;
   border: none;
   border-radius: var(--border-radius-sm);
-  padding: 10px 16px;
-  font-size: 0.95rem;
+  padding: 7px 10px;
+  font-size: 0.84rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
+  flex: 1;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  white-space: nowrap;
 }
 
 .game-btn:hover {
@@ -459,6 +462,23 @@ body {
 .btn-primary {
   background: var(--primary);
   color: #FFFFFF;
+}
+
+@media (max-width: 420px) {
+  .controls-panel {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .hint-pill-btn {
+    padding: 6px 4px;
+    font-size: 0.78rem;
+    gap: 3px;
+  }
+  .game-btn {
+    padding: 6px 6px;
+    font-size: 0.78rem;
+    gap: 3px;
+  }
 }
 
 /* Modals Overlay */
