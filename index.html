@@ -33,12 +33,18 @@
         <button class="world-badge-btn" id="world-badge-btn" title="Click to view Worlds">
           🌱 Sunny Meadow
         </button>
+        <div class="total-stars-pill" id="player-rating-badge" title="Tactical Elo Rating & Rank" style="background: linear-gradient(135deg, #FFF9C4 0%, #FFF176 100%); color: #795548; border-color: #FBC02D;">
+          <span id="header-rating-text">🐴 800 ⭐</span>
+        </div>
         <div class="total-stars-pill" title="Total Stars Earned">
           <span id="total-stars-count">0 ⭐</span>
         </div>
       </div>
 
       <div class="header-actions">
+        <button class="nav-icon-btn" id="btn-mode-toggle" title="Mode: Adaptive Elo (Click for Lichess Endless)" aria-label="Toggle Mode">🎯</button>
+        <a href="player.html" class="nav-icon-btn" id="btn-player-stats-link" title="Player Stats & Learning Curve" aria-label="Player Stats" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">📊</a>
+        <a href="admin.html" class="nav-icon-btn" id="btn-admin-portal-link" title="Admin Portal & Custom Uploads" aria-label="Admin Portal" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
         <button class="nav-icon-btn" id="btn-theme-selector" title="Switch Theme (Candy, Forest, Royal, Cosmic)" aria-label="Change Theme">🎨</button>
         <button class="nav-icon-btn" id="btn-toggle-dots" title="Helper Dots: OFF (Click to toggle)" aria-label="Toggle Helper Dots">⚪</button>
         <button class="nav-icon-btn" id="btn-how-to-play" title="How Pieces Move" aria-label="Chess Rules">📖</button>
@@ -54,7 +60,11 @@
     <!-- Level Banner -->
     <section class="level-banner">
       <div class="level-meta">
-        <span class="level-number-badge" id="level-number-text">Level 1</span>
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <span class="level-number-badge" id="level-number-text">Level 1</span>
+          <span class="level-number-badge" id="level-mode-badge" style="background: #0288D1;">🎯 Adaptive</span>
+          <span class="level-number-badge" id="level-tier-badge" style="background: #4CAF50;">🌱 Free</span>
+        </div>
         <h2 class="level-title-heading" id="level-title-text">The Queen's Hug</h2>
         <div class="level-goal-instruction" id="level-goal-text">
           <span class="turn-dot turn-w"></span> White to Play — Checkmate the King in 1 move!
@@ -140,10 +150,32 @@
         </div>
         <h3 class="victory-title" id="victory-title">🎉 Brilliant Move!</h3>
         <p class="victory-message" id="victory-message">You found the winning tactic!</p>
+        
+        <!-- Tactical Elo Rating Gain Banner -->
+        <div id="victory-rating-gain-box" style="margin: 10px 0 16px; display: inline-flex; align-items: center; gap: 8px; background: #FFF9C4; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.95rem; color: #795548; border: 2px solid #FBC02D;">
+          ⭐ +20 Rating! Now: <span id="victory-new-rating">820</span> (<span id="victory-rank-name">Knight Ranger</span>)
+        </div>
+
         <div class="victory-actions">
           <button class="game-btn btn-secondary" id="btn-replay-level">Play Again</button>
           <button class="game-btn btn-primary btn-large" id="btn-next-level">Next Puzzle ➔</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSCRIPTION LOCKED MODAL -->
+  <div class="modal-overlay" id="subscription-lock-modal">
+    <div class="modal-box" style="text-align: center;">
+      <button class="modal-close-btn" aria-label="Close">&times;</button>
+      <div style="font-size: 3rem; margin-bottom: 8px;">🏰🔒</div>
+      <h3 style="font-size: 1.4rem; color: var(--primary); margin-bottom: 8px;" id="lock-modal-title">Adventure Pass Required</h3>
+      <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 16px;" id="lock-modal-desc">
+        This master tactic is part of the <strong>Monthly or Yearly Adventure Pass</strong>! Upgrade or switch simulation tier in the Admin Portal.
+      </p>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="game-btn btn-secondary" id="btn-lock-close">Play Free Puzzles</button>
+        <a href="admin.html" class="game-btn btn-primary" style="text-decoration: none;">⚙️ Open Admin Portal</a>
       </div>
     </div>
   </div>

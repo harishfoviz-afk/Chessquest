@@ -47,8 +47,33 @@ Children are never penalized or stuck:
 - **👑 Royal Castle** (Classic blue, sparkling gold, crisp white)
 - **🚀 Cosmic Quest** (Deep space indigo, glowing neon cyan)
 
-### 8. 💾 Persistent Player Progress
-- Automatically saves unlocked levels, stars earned (1–3 stars based on hints used), and theme choices to browser `localStorage`.
+### 8. 🎯 Intelligent Adaptive Engine & Player Strength Allotment
+- Dynamically calculates the player's tactical Elo rating (starting at 800 Elo) and rank title (e.g. *Pawn Scout*, *Knight Ranger*, *Bishop Marksman*, *Castle Guardian*, *Queen's Champion*, *Dragon Master*).
+- Solves grant rating gains (`+20` for 0 hints, `+12` for 1 hint, `+6` for 2 hints), while retries gently deduct `8` Elo.
+- The engine intelligently analyzes player strengths and weaknesses to allot the optimal next puzzle matching the player's real skill level.
+
+### 9. ♾️ Lichess Endless Mode & Live API Integration
+- Connects directly to Lichess.org public APIs (`https://lichess.org/api/puzzle/daily`) and provides an endless stream of rated tactical puzzles.
+- Every Lichess puzzle is automatically adapted into the kid-friendly format with dynamic 3-tier hints.
+- Includes a robust offline/local bank of real Lichess puzzles across ratings 600–1600+ with zero latency.
+
+### 10. 📊 Player Performance & Learning Curve (`player.html`)
+- **Interactive SVG Learning Curve**: Visualizes rating progression over time as children solve tactical puzzles.
+- **Top Strengths**: Highlights tactical patterns where the child excels (e.g. *Mate in 1: 100%*, *Back-Rank Mate: 85%*).
+- **Improvement Areas & Weaknesses**: Identifies tactics needing reinforcement with direct **"🎯 Practice This Weakness"** buttons that immediately queue targeted exercises!
+
+### 11. ⚙️ Admin Portal & Puzzle Manager (`admin.html`)
+- **Download Templates**: Download verified sample templates in `.csv` and `.json` formats.
+- **Custom Puzzle Upload with 3 Dropdowns**:
+  1. *Dropdown 1 (Access Tier)*: `1-Week Free Trial`, `Monthly Subscription`, `Yearly Subscription`.
+  2. *Dropdown 2 (Tactical Theme)*: `Checkmate`, `Knight Fork`, `Pin`, `Skewer`, `Back-Rank`, `Hanging Piece`, `Endgame`.
+  3. *Dropdown 3 (Difficulty & Rating)*: `600–800`, `801–1100`, `1101–1400`, `1401–1800+`.
+- **Built-in Chess Engine Validation**: Uses `chess.js` to verify all FEN positions and legal moves before importing.
+- **Subscription Tier Simulator**: Allows coaches and parents to simulate and test different subscription tiers (`Free Trial`, `Monthly`, `Yearly`).
+
+### 12. 💾 Persistent Player Progress
+- Automatically saves unlocked levels, stars earned (1–3 stars based on hints used), rating history, custom uploaded puzzles, and theme choices to browser `localStorage`.
+
 
 ---
 

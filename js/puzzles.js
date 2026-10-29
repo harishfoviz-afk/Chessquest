@@ -1382,3 +1382,59 @@ export const PUZZLES = [
     }
   }
 ];
+
+// Enrich all default puzzles with difficulty rating, subscription tier, and normalized theme key
+PUZZLES.forEach(p => {
+  // Theme key normalization
+  const t = (p.theme || '').toLowerCase();
+  if (t.includes('mate in 1') || t.includes('scholar') || t.includes('hug')) p.themeKey = 'mateIn1';
+  else if (t.includes('mate in 2') || t.includes('combination') || t.includes('two-step') || t.includes('coronation')) p.themeKey = 'mateIn2';
+  else if (t.includes('back-rank') || t.includes('back rank') || t.includes('lawnmower')) p.themeKey = 'backRankMate';
+  else if (t.includes('fork') || t.includes('knight leap') || t.includes('royal')) p.themeKey = 'fork';
+  else if (t.includes('pin') || t.includes('skewer')) p.themeKey = 'pin';
+  else if (t.includes('hanging') || t.includes('capture') || t.includes('snack')) p.themeKey = 'hangingPiece';
+  else if (t.includes('discovered') || t.includes('unmask')) p.themeKey = 'discoveredAttack';
+  else if (t.includes('double check')) p.themeKey = 'doubleCheck';
+  else if (t.includes('endgame') || t.includes('promotion')) p.themeKey = 'endgame';
+  else p.themeKey = 'fork';
+
+  // Ratings progression across Worlds
+  if (!p.rating) {
+    if (p.world === 1) p.rating = 600 + (p.id * 15); // 615 - 750 (Free Trial)
+    else if (p.world === 2) p.rating = 750 + ((p.id - 10) * 16); // 766 - 910 (Free Trial)
+    else if (p.world === 3) p.rating = 920 + ((p.id - 20) * 18); // 938 - 1100 (Monthly)
+    else if (p.world === 4) p.rating = 1110 + ((p.id - 30) * 19); // 1129 - 1300 (Monthly)
+    else p.rating = 1310 + ((p.id - 40) * 24); // 1334 - 1550 (Yearly)
+  }
+
+  // Subscription Tiers
+  if (!p.tier) {
+    if (p.world <= 2) p.tier = 'free_trial';
+    else if (p.world <= 4) p.tier = 'monthly';
+    else p.tier = 'yearly';
+  }
+});
+
+// Custom Puzzles Management (from Admin uploads)
+export function getCustomPuzzles() {
+  if (typeof localStorage === 'undefined') return [];
+  const stored = localStorage.getItem('chess_quest_custom_puzzles');
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    console.warn('Failed to parse custom puzzles:', e);
+    return [];
+  }
+}
+
+export function saveCustomPuzzles(puzzles) {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem('chess_quest_custom_puzzles', JSON.stringify(puzzles));
+}
+
+export function getAllPuzzles() {
+  const custom = getCustomPuzzles();
+  return [...PUZZLES, ...custom];
+}
+

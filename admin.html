@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Quest: Admin Portal & Puzzle Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <style>
+    .admin-container {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--panel-border);
+    }
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-brand h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .admin-nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .admin-card {
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: var(--border-radius-md);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .admin-card h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.45;
+    }
+    .template-btn-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dropdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .dropdown-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .dropdown-group label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .admin-select {
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: var(--border-radius-sm);
+      border: 2px solid var(--panel-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .admin-select:focus {
+      border-color: var(--primary);
+    }
+    .file-drop-area {
+      border: 2px dashed var(--primary);
+      background: rgba(142, 36, 170, 0.04);
+      border-radius: var(--border-radius-md);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: background 0.2s;
+    }
+    .file-drop-area:hover {
+      background: rgba(142, 36, 170, 0.08);
+    }
+    .file-drop-area input[type="file"] {
+      display: none;
+    }
+    .tier-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    .tier-free { background: #4CAF50; }
+    .tier-monthly { background: #2196F3; }
+    .tier-yearly { background: #FF9800; }
+    .table-responsive {
+      overflow-x: auto;
+      border-radius: var(--border-radius-sm);
+      border: 1px solid var(--panel-border);
+      margin-top: 14px;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+    .admin-table th {
+      background: #F8FAFC;
+      padding: 10px 14px;
+      font-weight: 700;
+      border-bottom: 2px solid var(--panel-border);
+      color: var(--text-main);
+    }
+    .admin-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--panel-border);
+      color: var(--text-main);
+    }
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .alert-success { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+    .alert-error { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+  </style>
+</head>
+<body data-theme="candy">
+
+  <div class="admin-container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-brand">
+        <span style="font-size: 2.2rem;">⚙️</span>
+        <div>
+          <h1>Admin & Puzzle Manager</h1>
+          <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Chess Quest Educational Platform</span>
+        </div>
+      </div>
+      <div class="admin-nav-actions">
+        <a href="index.html" class="game-btn btn-primary" style="text-decoration: none;">🎮 Back to Game Arena</a>
+        <a href="player.html" class="game-btn btn-secondary" style="text-decoration: none;">📊 View Player Stats</a>
+      </div>
+    </header>
+
+    <!-- Notification Banner -->
+    <div id="admin-alert-box" style="display: none;"></div>
+
+    <!-- 1. Template Download Section -->
+    <section class="admin-card">
+      <h2>📥 1. Download Puzzle Templates</h2>
+      <p>Download our verified template to create custom chess puzzles for your students or children. You can edit with Excel, Google Sheets, or any text editor.</p>
+      
+      <div class="template-btn-group">
+        <button class="game-btn btn-primary" id="btn-download-csv">
+          📄 Download CSV Template (.csv)
+        </button>
+        <button class="game-btn btn-secondary" id="btn-download-json">
+          📋 Download JSON Template (.json)
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. Puzzle Upload Section with 3 Dropdowns -->
+    <section class="admin-card">
+      <h2>📤 2. Upload Custom Puzzles & Grant Tier Access</h2>
+      <p>Configure the 3 required access tiers, tactical theme, and difficulty level before importing your puzzles. The built-in chess engine will automatically validate every move sequence!</p>
+
+      <!-- The 3 Dropdowns as requested by user -->
+      <div class="dropdown-grid">
+        <!-- Dropdown 1: Access Tier -->
+        <div class="dropdown-group">
+          <label for="upload-tier-select">🔒 Dropdown 1: Subscription Tier Access</label>
+          <select id="upload-tier-select" class="admin-select">
+            <option value="free_trial">🌱 1-Week Free Trial (Starter Access)</option>
+            <option value="monthly">🥈 Monthly Subscription (Intermediate Access)</option>
+            <option value="yearly">👑 Yearly Subscription (Grandmaster Access)</option>
+          </select>
+        </div>
+
+        <!-- Dropdown 2: Tactical Theme -->
+        <div class="dropdown-group">
+          <label for="upload-theme-select">🎯 Dropdown 2: Tactical Theme Category</label>
+          <select id="upload-theme-select" class="admin-select">
+            <option value="mateIn1">Checkmate in 1 (Mate in 1)</option>
+            <option value="mateIn2">Checkmate in 2 (Combination)</option>
+            <option value="fork">Knight & Piece Forks</option>
+            <option value="pin">Laser Pins</option>
+            <option value="skewer">Skewer Attacks</option>
+            <option value="backRankMate">Back-Rank Castle Mate</option>
+            <option value="hangingPiece">Hanging Piece Capture</option>
+            <option value="endgame">Pawn & King Endgame</option>
+          </select>
+        </div>
+
+        <!-- Dropdown 3: Difficulty Level / Elo -->
+        <div class="dropdown-group">
+          <label for="upload-rating-select">⭐ Dropdown 3: Difficulty & Target Rating</label>
+          <select id="upload-rating-select" class="admin-select">
+            <option value="700">Beginner Tactician (600 - 800 Elo)</option>
+            <option value="950" selected>Apprentice Knight (801 - 1100 Elo)</option>
+            <option value="1250">Castle Guardian (1101 - 1400 Elo)</option>
+            <option value="1550">Dragon Grandmaster (1401 - 1800+ Elo)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- File Drop Area -->
+      <div class="file-drop-area" id="drop-zone">
+        <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">📁</span>
+        <strong style="color: var(--primary); font-size: 1.05rem;">Click to browse or drop your CSV / JSON file here</strong>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">Supported formats: .csv, .json (All positions validated via chess.js)</p>
+        <input type="file" id="file-input" accept=".csv,.json">
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="game-btn btn-primary" id="btn-import-puzzles" disabled>
+          🚀 Validate & Import Puzzles
+        </button>
+        <span id="selected-file-name" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">No file selected</span>
+      </div>
+    </section>
+
+    <!-- 3. Active Subscription Simulator -->
+    <section class="admin-card">
+      <h2>👤 3. Active Player Subscription Simulator</h2>
+      <p>Simulate how the app behaves for different subscription tiers. You can switch between 1-Week Free Trial, Monthly, and Yearly access to test puzzle gating.</p>
+
+      <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+        <div>
+          <span style="font-size: 0.88rem; font-weight: 700; display: block; margin-bottom: 4px;">Current Player Tier:</span>
+          <span id="current-tier-display" class="tier-badge tier-free">🌱 1-Week Free Trial (Active)</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="game-btn btn-secondary" id="btn-set-free-trial">Set Free Trial</button>
+          <button class="game-btn btn-secondary" id="btn-set-monthly">Set Monthly</button>
+          <button class="game-btn btn-primary" id="btn-set-yearly">Set Yearly Grandmaster</button>
+          <button class="game-btn btn-secondary" id="btn-reset-trial-days" title="Reset 7-day trial timer">🔄 Reset 7 Days</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Uploaded Custom Puzzles Table -->
+    <section class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <h2>📚 4. Custom Uploaded Puzzles Catalog (<span id="custom-count">0</span>)</h2>
+        <button class="game-btn btn-secondary" id="btn-clear-custom" style="color: #D32F2F; border-color: #FFCDD2;">
+          🗑️ Clear Custom Puzzles
+        </button>
+      </div>
+      <p>These are the custom puzzles currently stored in your browser. They are seamlessly merged into the player's game arena.</p>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Theme</th>
+              <th>Rating</th>
+              <th>Tier</th>
+              <th>Solution</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="custom-puzzles-tbody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                No custom puzzles uploaded yet. Download the template above to get started!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module" src="./js/admin.js"></script>
+</body>
+</html>

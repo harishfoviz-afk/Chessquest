@@ -1,24 +1,29 @@
 // Chess Quest: Main Application Controller
-// Orchestrates level progression, hint tiers, local storage, UI dialogs, and game loop
+// Orchestrates adaptive progression, Lichess endless mode, hint tiers, local storage, UI dialogs, and game loop
 
 import { Chess } from './chess.js';
-import { WORLDS, PUZZLES } from './puzzles.js';
+import { WORLDS, getAllPuzzles } from './puzzles.js';
 import { sound } from './audio.js';
 import { confetti } from './confetti.js';
 import { MascotCompanion } from './mascot.js';
 import { KidChessBoard } from './board.js';
+import { adaptiveEngine } from './adaptive-engine.js';
+import { subscriptionService, TIERS } from './subscription-service.js';
+import { lichessService } from './lichess-service.js';
 
 class ChessQuestApp {
   constructor() {
-    this.puzzles = PUZZLES;
+    this.puzzles = getAllPuzzles();
     this.worlds = WORLDS;
 
     this.currentLevelIndex = 0;
+    this.activePuzzle = null;
     this.unlockedLevel = 1;
     this.levelStars = {};
     this.currentHintsUsed = new Set();
     this.currentMoveIndex = 0;
     this.activeTheme = 'candy';
+    this.isEndlessMode = false;
 
     // Helper dots: disabled by default; offered after 3s inactivity
     this.helperDotsActive = false;
@@ -33,6 +38,19 @@ class ChessQuestApp {
     this.initMascotAndBoard();
     this.bindUIEvents();
     this.applyTheme(this.activeTheme);
+    this.updateHeaderRating();
+
+    // Check if player came from Player Stats with a focus theme to practice
+    const focusTheme = localStorage.getItem('chess_quest_focus_theme');
+    if (focusTheme) {
+      localStorage.removeItem('chess_quest_focus_theme');
+      const focusPuzzle = adaptiveEngine.selectNextPuzzle(this.puzzles, { focusTheme });
+      if (focusPuzzle) {
+        this.loadPuzzleDirect(focusPuzzle);
+        return;
+      }
+    }
+
     this.loadLevel(this.currentLevelIndex);
   }
 
@@ -78,13 +96,30 @@ class ChessQuestApp {
   }
 
   getCurrentPuzzle() {
-    return this.puzzles[this.currentLevelIndex];
+    if (this.activePuzzle) return this.activePuzzle;
+    return this.puzzles[this.currentLevelIndex] || this.puzzles[0];
   }
 
   loadLevel(index) {
     if (index < 0 || index >= this.puzzles.length) return;
-    this.currentLevelIndex = index;
     const puzzle = this.puzzles[index];
+    this.loadPuzzleDirect(puzzle, index);
+  }
+
+  loadPuzzleDirect(puzzle, index = null) {
+    // Subscription access check
+    if (!subscriptionService.isPuzzleAccessible(puzzle)) {
+      this.showSubscriptionLockModal(puzzle);
+      return;
+    }
+
+    this.activePuzzle = puzzle;
+    if (index !== null) {
+      this.currentLevelIndex = index;
+    } else {
+      const foundIdx = this.puzzles.findIndex(p => p.id === puzzle.id);
+      if (foundIdx !== -1) this.currentLevelIndex = foundIdx;
+    }
 
     // Reset chess engine
     this.chess.load(puzzle.fen);
@@ -103,17 +138,58 @@ class ChessQuestApp {
     this.hideHelperDotsPrompt();
     this.board.render();
 
+    // Record attempt in adaptive engine
+    adaptiveEngine.recordAttempt(puzzle);
+
     // Update Header / UI Info
     this.updateLevelInfo(puzzle);
     this.updateHintButtons();
     this.updateTotalStarsBadge();
+    this.updateHeaderRating();
 
     // Mascot welcomes player with storyline
-    this.mascot.say(`Level ${puzzle.id}: ${puzzle.story}`, 'thinking', 6000);
+    this.mascot.say(`${puzzle.title}: ${puzzle.story}`, 'thinking', 6000);
 
     // Save current level index and start 3-second inactivity timer
     this.saveProgress();
     this.startInactivityTimer();
+  }
+
+  async loadNextIntelligentPuzzle() {
+    if (this.isEndlessMode) {
+      const endlessPuzzle = await lichessService.getNextEndlessPuzzle(adaptiveEngine.getRating());
+      if (endlessPuzzle) {
+        this.loadPuzzleDirect(endlessPuzzle);
+        return;
+      }
+    }
+
+    // Adaptive Mode: Pick next puzzle based on player strength!
+    const nextPuzzle = adaptiveEngine.selectNextPuzzle(this.puzzles);
+    if (nextPuzzle) {
+      this.loadPuzzleDirect(nextPuzzle);
+    } else {
+      // Fallback to sequential next
+      this.loadLevel((this.currentLevelIndex + 1) % this.puzzles.length);
+    }
+  }
+
+  showSubscriptionLockModal(puzzle) {
+    const modal = document.getElementById('subscription-lock-modal');
+    if (!modal) return;
+
+    const titleEl = document.getElementById('lock-modal-title');
+    const descEl = document.getElementById('lock-modal-desc');
+
+    const tierInfo = subscriptionService.getTierInfo(puzzle.tier);
+    if (titleEl) {
+      titleEl.textContent = `🏰 ${tierInfo.name} Required`;
+    }
+    if (descEl) {
+      descEl.innerHTML = `"${puzzle.title}" is part of the <strong>${tierInfo.name}</strong> (${puzzle.rating || 900} Elo).<br>You can switch or simulate subscription tiers in the <strong>Admin Portal</strong>!`;
+    }
+
+    this.openModal('subscription-lock-modal');
   }
 
   updateLevelInfo(puzzle) {
@@ -122,16 +198,38 @@ class ChessQuestApp {
     const levelGoalEl = document.getElementById('level-goal-text');
     const worldBadgeEl = document.getElementById('world-badge-btn');
     const starsEarnedEl = document.getElementById('level-stars-display');
+    const modeBadgeEl = document.getElementById('level-mode-badge');
+    const tierBadgeEl = document.getElementById('level-tier-badge');
 
-    if (levelNumberEl) levelNumberEl.textContent = `Level ${puzzle.id}`;
+    if (levelNumberEl) {
+      levelNumberEl.textContent = puzzle.lichessId ? `Lichess #${puzzle.lichessId}` : `Level ${puzzle.id}`;
+    }
     if (levelTitleEl) levelTitleEl.textContent = puzzle.title;
     if (levelGoalEl) {
       const turnName = puzzle.turn === 'w' ? 'White' : 'Black';
-      levelGoalEl.innerHTML = `<span class="turn-dot turn-${puzzle.turn}"></span> ${turnName} to Play — ${puzzle.goal}`;
+      levelGoalEl.innerHTML = `<span class="turn-dot turn-${puzzle.turn}"></span> ${turnName} to Play — ${puzzle.goal} (${puzzle.rating || 800} Elo)`;
+    }
+
+    if (modeBadgeEl) {
+      modeBadgeEl.textContent = this.isEndlessMode ? '♾️ Lichess Endless' : '🎯 Adaptive';
+      modeBadgeEl.style.background = this.isEndlessMode ? '#9C27B0' : '#0288D1';
+    }
+
+    if (tierBadgeEl) {
+      if (puzzle.tier === 'yearly') {
+        tierBadgeEl.textContent = '👑 Yearly';
+        tierBadgeEl.style.background = '#FF9800';
+      } else if (puzzle.tier === 'monthly') {
+        tierBadgeEl.textContent = '🥈 Monthly';
+        tierBadgeEl.style.background = '#2196F3';
+      } else {
+        tierBadgeEl.textContent = '🌱 Free';
+        tierBadgeEl.style.background = '#4CAF50';
+      }
     }
 
     if (worldBadgeEl) {
-      worldBadgeEl.innerHTML = `${puzzle.worldIcon} ${puzzle.worldName}`;
+      worldBadgeEl.innerHTML = `${puzzle.worldIcon || '🏰'} ${puzzle.worldName || 'Tactics'}`;
     }
 
     if (starsEarnedEl) {
@@ -150,6 +248,19 @@ class ChessQuestApp {
       let total = 0;
       Object.values(this.levelStars).forEach(s => total += s);
       badge.textContent = `${total} ⭐`;
+    }
+  }
+
+  updateHeaderRating() {
+    const ratingEl = document.getElementById('header-rating-text');
+    if (ratingEl) {
+      const r = adaptiveEngine.getRating();
+      const rank = adaptiveEngine.getRank();
+      ratingEl.textContent = `${rank.icon} ${r} ⭐`;
+      const badge = document.getElementById('player-rating-badge');
+      if (badge) {
+        badge.title = `Rating: ${r} • Rank: ${rank.title} (Click 📊 Player Stats to view curve)`;
+      }
     }
   }
 
@@ -189,7 +300,6 @@ class ChessQuestApp {
   }
 
   handleSquareSelected(squareKey) {
-    // If a piece is selected and dots are not active, start or refresh the 3-sec timer
     if (!this.helperDotsActive && !this.inactivityPromptAnswered) {
       this.startInactivityTimer();
     }
@@ -206,7 +316,6 @@ class ChessQuestApp {
     }
     this.mascot.say("Need a little help? Want me to show the green helper dots? 🟢", 'thinking', 8000);
 
-    // Auto-dismiss after 9 seconds if untouched so it never hangs around
     if (this.toastAutoDismissTimer) clearTimeout(this.toastAutoDismissTimer);
     this.toastAutoDismissTimer = setTimeout(() => {
       this.hideHelperDotsPrompt();
@@ -272,7 +381,6 @@ class ChessQuestApp {
   }
 
   handlePlayerMove(moveObj) {
-    // Player made a move: cancel timer & hide prompt
     this.clearInactivityTimer();
     this.hideHelperDotsPrompt();
 
@@ -289,7 +397,7 @@ class ChessQuestApp {
 
     if (!moveRes) return; // Illegal chess move
 
-    // Check if player's move matches the expected solution move
+    // Check if player's move matches expected solution move
     const expectedMoveSan = solutionMoves[this.currentMoveIndex];
     const isExpectedSolution = this.checkIfMoveMatchesSolution(moveRes, expectedMoveSan);
 
@@ -298,7 +406,6 @@ class ChessQuestApp {
       this.board.clearHints();
       this.board.render();
 
-      // Sound
       if (moveRes.captured) {
         sound.playCapture();
       } else if (this.chess.inCheck()) {
@@ -309,10 +416,9 @@ class ChessQuestApp {
 
       this.currentMoveIndex++;
 
-      // Check if more moves in sequence (e.g. computer responds)
+      // Check if more moves in sequence (computer reply)
       if (this.currentMoveIndex < solutionMoves.length) {
-        // Computer's automatic response
-        this.board.gridEl.style.pointerEvents = 'none'; // Temporarily lock board
+        this.board.gridEl.style.pointerEvents = 'none';
         this.mascot.say("Great move! Watch the opponent's reply...", 'thinking', 2000);
 
         setTimeout(() => {
@@ -329,8 +435,6 @@ class ChessQuestApp {
           this.board.render();
           this.board.gridEl.style.pointerEvents = 'auto';
           this.mascot.say("Now deliver the final winning blow!", 'hint', 4000);
-
-          // Restart 3s inactivity timer for the next move
           this.startInactivityTimer();
         }, 650);
       } else {
@@ -338,14 +442,14 @@ class ChessQuestApp {
         this.handlePuzzleComplete();
       }
     } else {
-      // INCORRECT MOVE (Legal chess move, but not the puzzle tactic)
+      // INCORRECT MOVE
+      adaptiveEngine.recordFailure(puzzle);
+      this.updateHeaderRating();
+
       sound.playOops();
       this.board.playOopsAnimation(moveObj.from, moveObj.to);
-
-      // Playful gentle coaching
       this.mascot.sayOops();
 
-      // Gently undo the move so the child can try again
       setTimeout(() => {
         this.chess.undo();
         this.board.render();
@@ -356,13 +460,11 @@ class ChessQuestApp {
 
   checkIfMoveMatchesSolution(actualMove, expectedSan) {
     if (!expectedSan) return false;
-    // Strip check/mate marks for comparison
     const cleanActual = actualMove.san.replace(/[+#]/g, '');
     const cleanExpected = expectedSan.replace(/[+#]/g, '');
 
     if (cleanActual === cleanExpected) return true;
 
-    // Also check if source and destination match magicMove if on move 0
     if (this.currentMoveIndex === 0) {
       const puzzle = this.getCurrentPuzzle();
       if (puzzle.magicMove) {
@@ -377,10 +479,6 @@ class ChessQuestApp {
     sound.playVictory();
     confetti.burst(100);
 
-    // Calculate stars:
-    // 0 hints used -> 3 stars
-    // 1 hint used -> 2 stars
-    // 2 or 3 hints used -> 1 star
     const hintsCount = this.currentHintsUsed.size;
     let starsEarned = 3;
     if (hintsCount === 1) starsEarned = 2;
@@ -392,22 +490,25 @@ class ChessQuestApp {
       this.levelStars[puzzle.id] = starsEarned;
     }
 
-    // Unlock next level if currently on highest
     if (puzzle.id === this.unlockedLevel && this.unlockedLevel < this.puzzles.length) {
       this.unlockedLevel++;
     }
 
     this.saveProgress();
     this.updateTotalStarsBadge();
+
+    // Record in adaptive engine
+    const ratingResult = adaptiveEngine.recordSolve(puzzle, hintsCount);
+    this.updateHeaderRating();
+
     this.mascot.sayVictory(starsEarned);
 
-    // Show Victory Modal after gentle delay
     setTimeout(() => {
-      this.showVictoryModal(puzzle, starsEarned);
+      this.showVictoryModal(puzzle, starsEarned, ratingResult);
     }, 700);
   }
 
-  showVictoryModal(puzzle, starsEarned) {
+  showVictoryModal(puzzle, starsEarned, ratingResult) {
     const modal = document.getElementById('victory-modal');
     if (!modal) return;
 
@@ -423,6 +524,16 @@ class ChessQuestApp {
       msgEl.textContent = `You completed "${puzzle.title}" with flying colors!`;
     }
 
+    const ratingGainEl = document.getElementById('victory-rating-gain-box');
+    const newRatingEl = document.getElementById('victory-new-rating');
+    const rankNameEl = document.getElementById('victory-rank-name');
+
+    if (ratingResult && ratingGainEl) {
+      ratingGainEl.style.display = 'inline-flex';
+      if (newRatingEl) newRatingEl.textContent = ratingResult.newRating;
+      if (rankNameEl) rankNameEl.textContent = ratingResult.currentRank.title;
+    }
+
     if (starsContainer) {
       starsContainer.innerHTML = `
         <span class="victory-star star-1 ${starsEarned >= 1 ? 'animate-star' : 'star-dim'}">⭐</span>
@@ -432,26 +543,18 @@ class ChessQuestApp {
     }
 
     if (nextBtn) {
-      if (this.currentLevelIndex < this.puzzles.length - 1) {
-        nextBtn.textContent = 'Next Puzzle ➔';
-        nextBtn.onclick = () => {
-          this.closeModal('victory-modal');
-          this.loadLevel(this.currentLevelIndex + 1);
-        };
-      } else {
-        nextBtn.textContent = '👑 Grandmaster Finish!';
-        nextBtn.onclick = () => {
-          this.closeModal('victory-modal');
-          this.openLevelSelectModal();
-        };
-      }
+      nextBtn.textContent = 'Next Puzzle ➔';
+      nextBtn.onclick = () => {
+        this.closeModal('victory-modal');
+        this.loadNextIntelligentPuzzle();
+      };
     }
 
     const replayBtn = document.getElementById('btn-replay-level');
     if (replayBtn) {
       replayBtn.onclick = () => {
         this.closeModal('victory-modal');
-        this.loadLevel(this.currentLevelIndex);
+        this.loadPuzzleDirect(puzzle);
       };
     }
 
@@ -491,50 +594,67 @@ class ChessQuestApp {
     this.updateHintButtons();
 
     this.board.animateMagicWand(puzzle.magicMove.from, puzzle.magicMove.to, () => {
-      // Magic move demo finished
       this.board.showHintNudge(puzzle.magicMove.from);
       this.board.showHintTarget(puzzle.magicMove.to);
     });
   }
 
+  toggleMode() {
+    this.isEndlessMode = !this.isEndlessMode;
+    const modeBtn = document.getElementById('btn-mode-toggle');
+    if (modeBtn) {
+      modeBtn.textContent = this.isEndlessMode ? '♾️' : '🎯';
+      modeBtn.title = this.isEndlessMode
+        ? 'Mode: Lichess Endless (Click for Adaptive Story)'
+        : 'Mode: Adaptive Elo (Click for Lichess Endless)';
+    }
+
+    const modeBadge = document.getElementById('level-mode-badge');
+    if (modeBadge) {
+      modeBadge.textContent = this.isEndlessMode ? '♾️ Lichess Endless' : '🎯 Adaptive';
+      modeBadge.style.background = this.isEndlessMode ? '#9C27B0' : '#0288D1';
+    }
+
+    sound.playPop();
+    if (this.isEndlessMode) {
+      this.mascot.say("Lichess Endless Mode activated! Streaming infinite tactical puzzles! ♾️✨", 'cheer', 5000);
+      this.loadNextIntelligentPuzzle();
+    } else {
+      this.mascot.say("Adaptive Adventure Mode activated! Intelligently matching your tactical strength! 🎯🛡️", 'cheer', 5000);
+      this.loadNextIntelligentPuzzle();
+    }
+  }
+
   // Modals & UI Controls
   openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.classList.add('active');
-    }
+    if (modal) modal.classList.add('active');
   }
 
   closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.classList.remove('active');
-    }
+    if (modal) modal.classList.remove('active');
   }
 
   openLevelSelectModal() {
     const modal = document.getElementById('level-select-modal');
     if (!modal) return;
-
-    this.renderLevelSelectGrid(1); // Default to world 1
+    this.renderLevelSelectGrid(1);
     this.openModal('level-select-modal');
   }
 
-  renderLevelSelectGrid(worldId = 1) {
+  renderLevelSelectGrid(worldId) {
     const tabsContainer = document.getElementById('world-tabs-container');
     const gridContainer = document.getElementById('level-grid-container');
 
     if (tabsContainer) {
       tabsContainer.innerHTML = '';
       this.worlds.forEach(w => {
-        const tabBtn = document.createElement('button');
-        tabBtn.className = `world-tab-btn ${w.id === worldId ? 'active' : ''}`;
-        tabBtn.innerHTML = `<span>${w.icon}</span> ${w.name}`;
-        tabBtn.onclick = () => {
-          sound.playPop();
-          this.renderLevelSelectGrid(w.id);
-        };
-        tabsContainer.appendChild(tabBtn);
+        const btn = document.createElement('button');
+        btn.className = `world-tab-btn ${w.id === worldId ? 'active' : ''}`;
+        btn.textContent = `${w.icon} ${w.name}`;
+        btn.onclick = () => this.renderLevelSelectGrid(w.id);
+        tabsContainer.appendChild(btn);
       });
     }
 
@@ -544,28 +664,24 @@ class ChessQuestApp {
 
       worldPuzzles.forEach(p => {
         const isUnlocked = p.id <= this.unlockedLevel;
-        const isCurrent = p.id === (this.currentLevelIndex + 1);
         const stars = this.levelStars[p.id] || 0;
 
         const card = document.createElement('div');
-        card.className = `level-card ${isUnlocked ? 'unlocked' : 'locked'} ${isCurrent ? 'current-active' : ''}`;
-        
-        let starsStr = '';
-        if (isUnlocked) {
-          for (let s = 1; s <= 3; s++) {
-            starsStr += s <= stars ? '⭐' : '☆';
-          }
+        card.className = `level-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+        let starsHtml = '';
+        for (let i = 1; i <= 3; i++) {
+          starsHtml += `<span class="star-icon ${i <= stars ? 'star-filled' : 'star-empty'}">⭐</span>`;
         }
 
         card.innerHTML = `
-          <div class="level-card-number">${p.id}</div>
-          <div class="level-card-title">${isUnlocked ? p.title : 'Locked'}</div>
-          <div class="level-card-stars">${isUnlocked ? starsStr : '🔒'}</div>
+          <div class="level-card-number">${isUnlocked ? p.id : '🔒'}</div>
+          <div class="level-card-title">${p.title}</div>
+          <div class="level-card-stars">${isUnlocked ? starsHtml : 'Locked'}</div>
         `;
 
         if (isUnlocked) {
           card.onclick = () => {
-            sound.playPop();
             this.closeModal('level-select-modal');
             this.loadLevel(p.id - 1);
           };
@@ -607,12 +723,8 @@ class ChessQuestApp {
     const btnNext = document.getElementById('btn-next-level-nav');
     if (btnNext) {
       btnNext.addEventListener('click', () => {
-        if (this.currentLevelIndex < this.unlockedLevel - 1 && this.currentLevelIndex < this.puzzles.length - 1) {
-          sound.playPop();
-          this.loadLevel(this.currentLevelIndex + 1);
-        } else {
-          this.mascot.say("Solve this puzzle to unlock the next one! 🗝️", 'thinking', 4000);
-        }
+        sound.playPop();
+        this.loadNextIntelligentPuzzle();
       });
     }
 
@@ -620,8 +732,14 @@ class ChessQuestApp {
     if (btnRestart) {
       btnRestart.addEventListener('click', () => {
         sound.playPop();
-        this.loadLevel(this.currentLevelIndex);
+        this.loadPuzzleDirect(this.getCurrentPuzzle());
       });
+    }
+
+    // Mode Toggle (Adaptive vs Lichess Endless)
+    const btnMode = document.getElementById('btn-mode-toggle');
+    if (btnMode) {
+      btnMode.addEventListener('click', () => this.toggleMode());
     }
 
     // Level map & World badge
@@ -633,18 +751,21 @@ class ChessQuestApp {
 
     // Helper dots toggle & prompt buttons
     const btnDotsYes = document.getElementById('btn-helper-dots-yes');
-    if (btnDotsYes) {
-      btnDotsYes.addEventListener('click', () => this.enableHelperDots());
-    }
+    if (btnDotsYes) btnDotsYes.addEventListener('click', () => this.enableHelperDots());
 
     const btnDotsNo = document.getElementById('btn-helper-dots-no');
-    if (btnDotsNo) {
-      btnDotsNo.addEventListener('click', () => this.dismissHelperDots());
-    }
+    if (btnDotsNo) btnDotsNo.addEventListener('click', () => this.dismissHelperDots());
 
     const btnToggleDots = document.getElementById('btn-toggle-dots');
-    if (btnToggleDots) {
-      btnToggleDots.addEventListener('click', () => this.toggleHelperDotsManual());
+    if (btnToggleDots) btnToggleDots.addEventListener('click', () => this.toggleHelperDotsManual());
+
+    // Lock modal close
+    const btnLockClose = document.getElementById('btn-lock-close');
+    if (btnLockClose) {
+      btnLockClose.addEventListener('click', () => {
+        this.closeModal('subscription-lock-modal');
+        this.loadLevel(0); // Load starter free level
+      });
     }
 
     // Audio toggle

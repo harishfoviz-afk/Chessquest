@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node serve.js",
-    "test": "node test_puzzles.js"
+    "test": "node test_puzzles.js && node test_new_features.js"
   },
   "keywords": [
     "chess",

@@ -868,3 +868,26 @@ body {
   }
 }
 
+/* Header & Nav Responsive Tweaks */
+@media (max-width: 640px) {
+  .header-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .nav-icon-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  .player-rating-pill, .total-stars-pill, .world-badge-btn {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+
