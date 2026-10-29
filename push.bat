@@ -5,7 +5,12 @@ echo Pushing Chess Quest to:
 echo https://github.com/harishfoviz-afk/Chessquest
 echo ======================================================
 echo.
-"%LOCALAPPDATA%\MinGit\cmd\git.exe" push -u origin main
+where git >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    git push -u origin main
+) else (
+    "%LOCALAPPDATA%\MinGit\cmd\git.exe" push -u origin main
+)
 echo.
 if %ERRORLEVEL% EQU 0 (
     echo ======================================================
