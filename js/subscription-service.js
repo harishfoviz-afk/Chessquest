@@ -14,7 +14,7 @@ export const TIER_CONFIG = {
     color: '#4CAF50',
     maxRating: 950,
     trialDays: 7,
-    description: 'Access to beginner tactical puzzles (Rating up to 950) + Daily Lichess challenge'
+    description: 'Access to beginner tactical puzzles (Rating up to 950) + Daily tactical challenge'
   },
   [TIERS.MONTHLY]: {
     name: 'Monthly Subscription',

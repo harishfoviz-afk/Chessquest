@@ -1,9 +1,9 @@
-// Chess Quest: Lichess Endless Mode & Live API Service
-// Connects to Lichess.org public puzzle API and provides endless puzzle streaming with adaptive fallback
+// Chess Quest: Puzzle Streaming & Tactical API Engine
+// Powers continuous adaptive puzzles with live API streaming and offline tactical bank
 
 import { Chess } from './chess.js';
 
-// Real curated Lichess database puzzles across multiple ratings and themes
+// Curated master puzzle bank across multiple ratings and themes
 export const LICHESS_PUZZLE_BANK = [
   {
     id: "lic_001",
@@ -12,8 +12,8 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Mate in 1",
     themeKey: "mateIn1",
     tier: "free_trial",
-    title: "Lichess Spark: King Trap",
-    story: "Sir Sparky found this real game on Lichess! The Black King is trapped on the back wall.",
+    title: "Corridor King Trap",
+    story: "The enemy King is trapped on the back wall! Roll your Rook in for the victory!",
     goal: "Deliver a 1-move checkmate!",
     fen: "6k1/5ppp/8/8/8/8/1R6/1R4K1 w - - 0 1",
     turn: "w",
@@ -29,7 +29,7 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Hanging Piece",
     themeKey: "hangingPiece",
     tier: "free_trial",
-    title: "Lichess Catch: Free Bishop",
+    title: "Free Bishop Feast",
     story: "Black left their Bishop completely undefended in the center! Gobble it up!",
     goal: "Win the unprotected Black Bishop!",
     fen: "r1bqk2r/pppp1ppp/2n5/4b3/4Q3/2N5/PPP2PPP/R1B1KBNR w KQkq - 0 7",
@@ -46,7 +46,7 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Knight Fork",
     themeKey: "fork",
     tier: "free_trial",
-    title: "Lichess Leap: The Royal Fork",
+    title: "The Royal Fork Strike",
     story: "Your Knight can jump to c7, attacking the King and the corner Rook at the same time!",
     goal: "Deliver the royal fork on c7!",
     fen: "r3k2r/pp2pppp/2n2n2/1N6/8/8/PPP2PPP/R1B1K2R w KQkq - 0 1",
@@ -63,7 +63,7 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Laser Pin",
     themeKey: "pin",
     tier: "free_trial",
-    title: "Lichess Laser: Pinned Knight",
+    title: "Laser Pinned Knight",
     story: "The Black Knight cannot run away because the King is right behind it!",
     goal: "Win the pinned Knight!",
     fen: "r1bqk2r/pppp1ppp/2n5/8/1bB1n3/2N1Q3/PPP2PPP/R1B1K1NR w KQkq - 0 7",
@@ -80,7 +80,7 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Back-Rank Mate",
     themeKey: "backRankMate",
     tier: "free_trial",
-    title: "Lichess Corridor: Rook Sweep",
+    title: "Corridor Rook Sweep",
     story: "The enemy pawns create a prison wall! Send your heavy artillery!",
     goal: "Checkmate on the back rank!",
     fen: "3r2k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
@@ -97,9 +97,9 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Knight Fork",
     themeKey: "fork",
     tier: "free_trial",
-    title: "Lichess Royal Fork: King & Queen",
-    story: "Spot the jumping square where the Knight hits both King and Queen!",
-    goal: "Fork the King and Queen!",
+    title: "Double Pin Wonder",
+    story: "Bishop Barnaby steps up to pin the enemy piece and win material!",
+    goal: "Pin the Knight and win material!",
     fen: "r1b1k2r/pp3ppp/2n1p3/2q5/2B5/4PN2/PP1Q1PPP/R3K2R w KQkq - 0 12",
     turn: "w",
     moves: ["Bb5"],
@@ -114,8 +114,8 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Mate in 2",
     themeKey: "mateIn2",
     tier: "monthly",
-    title: "Lichess Combo: Queen & Bishop Battery",
-    story: "Team up Queen and Bishop aiming at the enemy corner h7!",
+    title: "Queen & Bishop Battery",
+    story: "Team up Queen and Bishop aiming at the enemy castle!",
     goal: "Break into the enemy castle!",
     fen: "r1b2rk1/pp1n1ppp/2p1p3/3p2q1/2PP4/2NBP3/PP3PPP/R2Q1RK1 w - - 0 11",
     turn: "w",
@@ -131,7 +131,7 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Skewer",
     themeKey: "skewer",
     tier: "monthly",
-    title: "Lichess Skewer: Through the King",
+    title: "Through the King Skewer",
     story: "Check the King, and win the undefended Queen hiding behind it!",
     goal: "Skewer King and Queen!",
     fen: "4k3/8/8/8/8/8/1q6/R3K3 w - - 0 1",
@@ -148,8 +148,8 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Discovered Attack",
     themeKey: "discoveredAttack",
     tier: "monthly",
-    title: "Lichess Discovery: Unmasking the Cannon",
-    story: "Move your Knight to unleash a hidden check from your Queen!",
+    title: "Unmasking the Cannon",
+    story: "Move your piece to unleash a hidden tactical strike!",
     goal: "Unleash the discovered check!",
     fen: "r1b1k2r/pppp1ppp/2n5/4P3/1b1q4/2NB4/PPP2PPP/R1BQK2R w KQkq - 0 8",
     turn: "w",
@@ -165,8 +165,8 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Double Check",
     themeKey: "doubleCheck",
     tier: "monthly",
-    title: "Lichess Double Check: Total Chaos",
-    story: "When two pieces give check at once, the King HAS to run away!",
+    title: "Double Check Storm",
+    story: "When two pieces give check at once, the King has nowhere to hide!",
     goal: "Deliver a devastating double check!",
     fen: "r1b2rk1/pp3ppp/2n1p3/q7/3Pn3/2NB1N2/PP1Q1PPP/R3K2R w KQ - 0 11",
     turn: "w",
@@ -182,7 +182,7 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Endgame",
     themeKey: "endgame",
     tier: "monthly",
-    title: "Lichess Endgame: The Passed Pawn Rush",
+    title: "Passed Pawn Rush",
     story: "Guide your brave pawn to the 8th rank to promote into a brand new Queen!",
     goal: "Push the unstoppable pawn!",
     fen: "8/4k3/8/4P3/8/8/8/4K3 w - - 0 1",
@@ -199,8 +199,8 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Knight Fork",
     themeKey: "fork",
     tier: "yearly",
-    title: "Lichess Master Fork: The Royal Trident",
-    story: "A Master-level tactic played on Lichess by top players! Find the winning sacrifice!",
+    title: "The Royal Trident Sacrifice",
+    story: "A master-level tactic! Find the winning piece sacrifice to break the defense!",
     goal: "Sacrifice and fork!",
     fen: "r2qk2r/ppp2ppp/2n1b3/2bpP3/4n3/2NB1N2/PPP2PPP/R1BQ1RK1 w kq - 0 8",
     turn: "w",
@@ -216,8 +216,8 @@ export const LICHESS_PUZZLE_BANK = [
     theme: "Mate in 2",
     themeKey: "mateIn2",
     tier: "yearly",
-    title: "Lichess Grandmaster: Anastasia's Mate",
-    story: "Knight locks down the escape squares while the Rook strikes the open h-file!",
+    title: "Anastasia's Castle Mate",
+    story: "Knight locks down the escape squares while the Rook strikes the open file!",
     goal: "Execute Anastasia's famous checkmate!",
     fen: "5rk1/1p3ppp/8/8/1N6/8/5PPP/R5K1 w - - 0 1",
     turn: "w",
@@ -234,7 +234,7 @@ class LichessService {
     this.currentIndex = 0;
   }
 
-  // Attempt live Lichess Daily puzzle fetch
+  // Attempt live daily puzzle fetch
   async fetchLiveDailyPuzzle() {
     try {
       const controller = new AbortController();
@@ -245,23 +245,21 @@ class LichessService {
       });
       clearTimeout(timeoutId);
 
-      if (!resp.ok) throw new Error(`Lichess HTTP ${resp.status}`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
 
       return this.convertLichessToQuest(data);
     } catch (err) {
-      console.log('Lichess live API unreachable, using seamless local stream:', err.message);
       return null;
     }
   }
 
-  // Converts Lichess API payload into kid-friendly Chess Quest puzzle
+  // Converts API payload into kid-friendly Chess Quest puzzle
   convertLichessToQuest(data) {
     if (!data || !data.puzzle || !data.game) return null;
 
     try {
       const chess = new Chess();
-      // If PGN is present, load it
       if (data.game.pgn) {
         chess.loadPgn(data.game.pgn);
       } else if (data.game.fen) {
@@ -271,7 +269,6 @@ class LichessService {
       const puzzle = data.puzzle;
       const initialPly = puzzle.initialPly || 0;
 
-      // Play up to initialPly if PGN has move history
       const history = chess.history({ verbose: true });
       const replayChess = new Chess();
       const targetPlies = Math.min(initialPly, history.length);
@@ -282,7 +279,6 @@ class LichessService {
       const solutionUci = puzzle.solution || [];
       if (solutionUci.length === 0) return null;
 
-      // Convert UCI solution to SAN moves
       const moves = [];
       const testChess = new Chess(replayChess.fen());
       for (const uci of solutionUci) {
@@ -305,15 +301,14 @@ class LichessService {
       if (rating > 1350) tier = 'yearly';
 
       return {
-        id: `lic_live_${puzzle.id}`,
-        lichessId: puzzle.id,
+        id: `quest_tactics_${puzzle.id}`,
         rating: rating,
         theme: puzzle.themes ? puzzle.themes[0] : 'Tactics',
-        themeKey: this.mapLichessTheme(puzzle.themes),
+        themeKey: this.mapTheme(puzzle.themes),
         tier: tier,
-        title: `Lichess Challenge #${puzzle.id}`,
-        story: `Daily challenge from Lichess! Rated ${rating} Elo.`,
-        goal: `Find the winning move! (${rating} Elo)`,
+        title: `Castle Tactical Quest`,
+        story: `A grandmaster tactical challenge on your adventure! Rated ${rating} Elo.`,
+        goal: `Find the winning tactical move! (${rating} Elo)`,
         fen: replayChess.fen(),
         turn: replayChess.turn(),
         moves: moves.slice(0, 3),
@@ -322,12 +317,12 @@ class LichessService {
         magicMove: { from: fromSq, to: toSq }
       };
     } catch (e) {
-      console.warn('Could not parse Lichess puzzle:', e);
+      console.warn('Could not parse puzzle payload:', e);
       return null;
     }
   }
 
-  mapLichessTheme(themes = []) {
+  mapTheme(themes = []) {
     if (!themes || themes.length === 0) return 'fork';
     const joined = themes.join(' ').toLowerCase();
     if (joined.includes('matein1')) return 'mateIn1';
@@ -345,11 +340,9 @@ class LichessService {
 
   // Get next endless puzzle matching player's current strength
   async getNextEndlessPuzzle(playerRating = 800) {
-    // 1. Try to fetch live Lichess daily puzzle if never fetched today
     const live = await this.fetchLiveDailyPuzzle();
     if (live) return live;
 
-    // 2. Stream from rated Lichess puzzle bank
     const candidates = [...this.endlessBank];
     candidates.sort((a, b) => {
       const distA = Math.abs(a.rating - playerRating);

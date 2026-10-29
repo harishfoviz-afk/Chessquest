@@ -251,12 +251,39 @@ body {
   gap: 2px;
 }
 
-.level-number-badge {
-  font-size: 0.85rem;
+.adventure-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.82rem;
   font-weight: 800;
-  color: var(--primary);
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+}
+
+.badge-level {
+  background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+  color: #FFFFFF !important;
+}
+
+.badge-tier-free {
+  background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
+  color: #FFFFFF !important;
+}
+
+.badge-tier-monthly {
+  background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
+  color: #FFFFFF !important;
+}
+
+.badge-tier-yearly {
+  background: linear-gradient(135deg, #FB8C00 0%, #E65100 100%);
+  color: #FFFFFF !important;
 }
 
 .level-title-heading {

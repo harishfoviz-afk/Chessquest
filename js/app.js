@@ -156,22 +156,22 @@ class ChessQuestApp {
   }
 
   async loadNextIntelligentPuzzle() {
-    if (this.isEndlessMode) {
-      const endlessPuzzle = await lichessService.getNextEndlessPuzzle(adaptiveEngine.getRating());
-      if (endlessPuzzle) {
-        this.loadPuzzleDirect(endlessPuzzle);
-        return;
-      }
-    }
-
-    // Adaptive Mode: Pick next puzzle based on player strength!
+    // 1. Pick next puzzle matching player's current strength from the adaptive catalog
     const nextPuzzle = adaptiveEngine.selectNextPuzzle(this.puzzles);
     if (nextPuzzle) {
       this.loadPuzzleDirect(nextPuzzle);
-    } else {
-      // Fallback to sequential next
-      this.loadLevel((this.currentLevelIndex + 1) % this.puzzles.length);
+      return;
     }
+
+    // 2. Continuous stream from the tactical bank
+    const endlessPuzzle = await lichessService.getNextEndlessPuzzle(adaptiveEngine.getRating());
+    if (endlessPuzzle) {
+      this.loadPuzzleDirect(endlessPuzzle);
+      return;
+    }
+
+    // Fallback: sequential next
+    this.loadLevel((this.currentLevelIndex + 1) % this.puzzles.length);
   }
 
   showSubscriptionLockModal(puzzle) {
@@ -186,7 +186,7 @@ class ChessQuestApp {
       titleEl.textContent = `🏰 ${tierInfo.name} Required`;
     }
     if (descEl) {
-      descEl.innerHTML = `"${puzzle.title}" is part of the <strong>${tierInfo.name}</strong> (${puzzle.rating || 900} Elo).<br>You can switch or simulate subscription tiers in the <strong>Admin Portal</strong>!`;
+      descEl.innerHTML = `"${puzzle.title}" is part of the <strong>${tierInfo.name}</strong> (${puzzle.rating || 900} ⭐).<br>You can switch or simulate subscription tiers in the <strong>Admin Portal</strong>!`;
     }
 
     this.openModal('subscription-lock-modal');
@@ -198,33 +198,28 @@ class ChessQuestApp {
     const levelGoalEl = document.getElementById('level-goal-text');
     const worldBadgeEl = document.getElementById('world-badge-btn');
     const starsEarnedEl = document.getElementById('level-stars-display');
-    const modeBadgeEl = document.getElementById('level-mode-badge');
     const tierBadgeEl = document.getElementById('level-tier-badge');
 
     if (levelNumberEl) {
-      levelNumberEl.textContent = puzzle.lichessId ? `Lichess #${puzzle.lichessId}` : `Level ${puzzle.id}`;
+      const puzNum = puzzle.id || (this.currentLevelIndex + 1);
+      levelNumberEl.textContent = `Level ${puzNum}`;
     }
     if (levelTitleEl) levelTitleEl.textContent = puzzle.title;
     if (levelGoalEl) {
       const turnName = puzzle.turn === 'w' ? 'White' : 'Black';
-      levelGoalEl.innerHTML = `<span class="turn-dot turn-${puzzle.turn}"></span> ${turnName} to Play — ${puzzle.goal} (${puzzle.rating || 800} Elo)`;
-    }
-
-    if (modeBadgeEl) {
-      modeBadgeEl.textContent = this.isEndlessMode ? '♾️ Lichess Endless' : '🎯 Adaptive';
-      modeBadgeEl.style.background = this.isEndlessMode ? '#9C27B0' : '#0288D1';
+      levelGoalEl.innerHTML = `<span class="turn-dot turn-${puzzle.turn}"></span> ${turnName} to Play — ${puzzle.goal} (${puzzle.rating || 800} ⭐)`;
     }
 
     if (tierBadgeEl) {
       if (puzzle.tier === 'yearly') {
-        tierBadgeEl.textContent = '👑 Yearly';
-        tierBadgeEl.style.background = '#FF9800';
+        tierBadgeEl.className = 'adventure-badge-pill badge-tier-yearly';
+        tierBadgeEl.textContent = '👑 Grandmaster Pass';
       } else if (puzzle.tier === 'monthly') {
-        tierBadgeEl.textContent = '🥈 Monthly';
-        tierBadgeEl.style.background = '#2196F3';
+        tierBadgeEl.className = 'adventure-badge-pill badge-tier-monthly';
+        tierBadgeEl.textContent = '🥈 Monthly Pass';
       } else {
-        tierBadgeEl.textContent = '🌱 Free';
-        tierBadgeEl.style.background = '#4CAF50';
+        tierBadgeEl.className = 'adventure-badge-pill badge-tier-free';
+        tierBadgeEl.textContent = '🌱 Free Adventure';
       }
     }
 
@@ -599,32 +594,6 @@ class ChessQuestApp {
     });
   }
 
-  toggleMode() {
-    this.isEndlessMode = !this.isEndlessMode;
-    const modeBtn = document.getElementById('btn-mode-toggle');
-    if (modeBtn) {
-      modeBtn.textContent = this.isEndlessMode ? '♾️' : '🎯';
-      modeBtn.title = this.isEndlessMode
-        ? 'Mode: Lichess Endless (Click for Adaptive Story)'
-        : 'Mode: Adaptive Elo (Click for Lichess Endless)';
-    }
-
-    const modeBadge = document.getElementById('level-mode-badge');
-    if (modeBadge) {
-      modeBadge.textContent = this.isEndlessMode ? '♾️ Lichess Endless' : '🎯 Adaptive';
-      modeBadge.style.background = this.isEndlessMode ? '#9C27B0' : '#0288D1';
-    }
-
-    sound.playPop();
-    if (this.isEndlessMode) {
-      this.mascot.say("Lichess Endless Mode activated! Streaming infinite tactical puzzles! ♾️✨", 'cheer', 5000);
-      this.loadNextIntelligentPuzzle();
-    } else {
-      this.mascot.say("Adaptive Adventure Mode activated! Intelligently matching your tactical strength! 🎯🛡️", 'cheer', 5000);
-      this.loadNextIntelligentPuzzle();
-    }
-  }
-
   // Modals & UI Controls
   openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -734,12 +703,6 @@ class ChessQuestApp {
         sound.playPop();
         this.loadPuzzleDirect(this.getCurrentPuzzle());
       });
-    }
-
-    // Mode Toggle (Adaptive vs Lichess Endless)
-    const btnMode = document.getElementById('btn-mode-toggle');
-    if (btnMode) {
-      btnMode.addEventListener('click', () => this.toggleMode());
     }
 
     // Level map & World badge

@@ -1,6 +1,8 @@
 // Kid-Friendly Progressive Chess Puzzles Database (50 Levels across 5 Worlds)
 // Fully verified with chess.js engine
 
+import { LICHESS_PUZZLE_BANK } from './lichess-service.js';
+
 export const WORLDS = [
   { id: 1, name: "Sunny Meadow", icon: "🌱", color: "#4CAF50", description: "Mate in 1 Explorers" },
   { id: 2, name: "Knight's Orchard", icon: "🍎", color: "#FF9800", description: "Forks & Leaps" },
@@ -1433,8 +1435,17 @@ export function saveCustomPuzzles(puzzles) {
   localStorage.setItem('chess_quest_custom_puzzles', JSON.stringify(puzzles));
 }
 
+// Additional tactical adventures powered by the engine
+const TACTICAL_QUESTS = LICHESS_PUZZLE_BANK.map((p, idx) => ({
+  ...p,
+  id: 50 + idx + 1,
+  world: p.tier === 'yearly' ? 5 : (p.tier === 'monthly' ? 4 : 2),
+  worldName: p.tier === 'yearly' ? "Dragon's Peak" : (p.tier === 'monthly' ? "Cloud Kingdom" : "Knight's Orchard"),
+  worldIcon: p.tier === 'yearly' ? "🐉" : (p.tier === 'monthly' ? "☁️" : "🍎")
+}));
+
 export function getAllPuzzles() {
   const custom = getCustomPuzzles();
-  return [...PUZZLES, ...custom];
+  return [...PUZZLES, ...TACTICAL_QUESTS, ...custom];
 }
 
